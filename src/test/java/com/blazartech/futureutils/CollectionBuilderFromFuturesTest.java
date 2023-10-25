@@ -6,6 +6,7 @@ package com.blazartech.futureutils;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -27,23 +28,23 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  * @author aar1069
  */
 @ExtendWith(SpringExtension.class)
-public class CollectionBuilderFromFuturesImplTest {
+public class CollectionBuilderFromFuturesTest {
     
-    private static final Logger logger = LoggerFactory.getLogger(CollectionBuilderFromFuturesImplTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(CollectionBuilderFromFuturesTest.class);
     
     @TestConfiguration
     public static class CollectionBuilderFromFuturesImplTestConfiguration {
         
         @Bean
-        public CollectionBuilderFromFuturesImpl<String, Integer> instance() {
-            return new CollectionBuilderFromFuturesImpl<>();
+        public CollectionBuilderFromFutures<String, Integer> instance() {
+            return new CollectionBuilderFromFutures<>();
         }
     }
     
     @Autowired
-    private CollectionBuilderFromFuturesImpl<String, Integer> instance;
+    private CollectionBuilderFromFutures<String, Integer> instance;
     
-    public CollectionBuilderFromFuturesImplTest() {
+    public CollectionBuilderFromFuturesTest() {
     }
     
     @BeforeAll
@@ -72,11 +73,11 @@ public class CollectionBuilderFromFuturesImplTest {
         logger.info("buildFromFutures");
         
         Collection<String> names = NAME_AGE_MAP.keySet();
-        Collection<Integer> ages = instance.buildFromFutures(names, n -> CompletableFuture.completedFuture(NAME_AGE_MAP.get(n)));
+        Collection<Integer> ages = instance.apply(names, n -> CompletableFuture.completedFuture(NAME_AGE_MAP.get(n)));
         
         assertEquals(names.size(), ages.size());
         Integer firstAge = ages.iterator().next();
-        assertTrue(NAME_AGE_MAP.get("person1") == firstAge || NAME_AGE_MAP.get("person2") == firstAge);
+        assertTrue(Objects.equals(NAME_AGE_MAP.get("person1"), firstAge) || Objects.equals(NAME_AGE_MAP.get("person2"), firstAge));
     }
     
 }

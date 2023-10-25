@@ -1,12 +1,14 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.blazartech.futureutils;
 
 import java.util.Collection;
 import java.util.concurrent.Future;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Provide a generic function that will take a collection of objects of one type,
@@ -14,19 +16,26 @@ import java.util.function.Function;
  * of built objects.
  * 
  * @author aar1069
- * @param <R> the type of objects being worked on
- * @param <T> the type of objects being produced
+ * @param <R> the type of input object
+ * @param <T> the type of output object
  */
-public interface CollectionBuilderFromFutures<R, T> {
+public class CollectionBuilderFromFutures<R, T> implements BiFunction<Collection<R>, Function<R, Future<T>>, Collection<T>> {
 
     /**
-     * build the objects.
+     * take a collection of objects, for each build a new object asynchronously, and
+     * finally collect the resulting objects.
      * 
      * @param source the source collection
-     * @param builder a function to build a new object (via Future) from an object
-     * in the source collection
-     * @return the newly built objects.
+     * @param builder a function to map an input object into a Future
+     * @return the resulting collection of objects
      */
-    Collection<T> buildFromFutures(Collection<R> source, Function<R, Future<T>> builder);
-    
+    @Override
+    public Collection<T> apply(Collection<R> source, Function<R, Future<T>> builder) {
+        return source.stream()
+                .map(builder)
+                .collect(Collectors.toList())
+                .stream()
+                .map(new FutureGetter<>())
+                .collect(Collectors.toList());
+    }
 }
