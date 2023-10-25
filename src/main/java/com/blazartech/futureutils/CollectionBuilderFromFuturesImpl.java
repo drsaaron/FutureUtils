@@ -27,14 +27,7 @@ public class CollectionBuilderFromFuturesImpl<R, T> implements CollectionBuilder
                 .map(builder)
                 .collect(Collectors.toList())
                 .stream()
-                .map(frFuture -> {
-                    try {
-                        T fr = frFuture.get();
-                        return fr;
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new RuntimeException("error getting FR data: " + e.getMessage(), e);
-                    }
-                })
+                .map(new FutureGetter<>())
                 .collect(Collectors.toList());
     }
 }
